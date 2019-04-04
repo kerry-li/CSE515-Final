@@ -11,13 +11,20 @@ def parseData(fileName, delimiter=';'):
     y = allData.values[:, -1:]
     return X, y
 
-def splitData(n, percentTraining):
+def splitData(n, percentTraining=0.8):
     samples = np.arange(n)
     np.random.shuffle(samples)
     numberTraining = np.ceil(n * percentTraining).astype(int)
     trainingSamples = samples[:numberTraining]
     valSamples = samples[numberTraining:]
     return trainingSamples, valSamples
+
+def parseAndSplit(fileName, delimiter=';', percentTraining=0.8):
+    allX, allY = parseData(fileName, delimiter)
+    trainingSamples, valSamples = splitData(allY.size, percentTraining)
+    training = (allX[trainingSamples], allY[trainingSamples])
+    val = (allX[valSamples], allY[valSamples])
+    return training, val
 
 def main():
     parseData('../data/winequality-red.csv')
