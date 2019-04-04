@@ -8,7 +8,7 @@ import pandas as pd
 def parseData(fileName, delimiter=';'):
     allData = pd.read_csv(fileName, delimiter)
     X = allData.values[:, :-1]
-    y = allData.values[:, -1:]
+    y = allData.values[:, -1:].ravel()
     return X, y
 
 def splitData(n, percentTraining=0.8):
