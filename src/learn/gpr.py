@@ -8,3 +8,11 @@ def trainGaussianProcess(X, y, kernel=None):
     gp = gpr(kernel=kernel, optimizer=None)
     gp.fit(X,y)
     return gp
+
+def main():
+    from src.data import parseData
+    X, y = parseData('../../data/winequality-red.csv')
+    trainGaussianProcess(X, y)
+
+if __name__ == '__main__':
+    main()
