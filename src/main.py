@@ -1,12 +1,17 @@
-import src.data as data
-import src.learn.blr as blr
-import src.learn.gpr as gpr
+import data
+import learn.blr as blr
+import learn.gpr as gpr
+
+import numpy as np
+import random
 
 WHITE_WINE_FILENAME = '../data/winequality-white.csv'
 
 PERCENT_TRAINING = 0.8
 
 def main():
+    random.seed(0)
+    np.random.seed(0)
     whiteTrainingData, whiteValData = data.parseAndSplit(WHITE_WINE_FILENAME,
                                                          ';',
                                                          PERCENT_TRAINING)

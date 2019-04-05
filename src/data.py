@@ -4,11 +4,15 @@
 import numpy as np
 import pandas as pd
 
+from sklearn.preprocessing import normalize
+
 # Returns X, y parsed from file name.
-def parseData(fileName, delimiter=';'):
-    allData = pd.read_csv(fileName, delimiter)
-    X = allData.values[:, :-1]
-    y = allData.values[:, -1:].ravel()
+def parseData(fileName, delimiter=';', norm=True):
+    allData = pd.read_csv(fileName, delimiter).values
+    if norm:
+        allData = normalize(allData, axis=0)
+    X = allData[:, :-1]
+    y = allData[:, -1:].ravel()
     return X, y
 
 def splitData(n, percentTraining=0.8):
@@ -27,9 +31,10 @@ def parseAndSplit(fileName, delimiter=';', percentTraining=0.8):
     return training, val
 
 def main():
-    parseData('../data/winequality-red.csv')
+    X, y = parseData('../data/winequality-red.csv')
     print(splitData(100, .871))
     print(splitData(100, 1))
+    print(X)
 
 if __name__ == '__main__':
     main()
