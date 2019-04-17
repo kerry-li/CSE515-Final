@@ -16,7 +16,7 @@ class AutoKernelGpr:
     def search(self, currentKernel):
         augmentedKernels = []
         for kernel in self.baseKernels:
-            augmentedKernels.append(self.augment(currentKernel, kernel))
+            augmentedKernels.extend(self.augment(currentKernel, kernel))
 
         return self.argmaxModelEvidence(augmentedKernels)
 
