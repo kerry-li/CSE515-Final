@@ -1,3 +1,5 @@
+import numpy as np
+
 # Class for automated model selection described by the method at
 # https://pdfs.semanticscholar.org/cc27/639170d87581e2e1ecdc4dca3716915619d2.pdf
 # using only GPR priors on the latent function.
@@ -35,4 +37,15 @@ class AutoKernelGpr:
         return [composedAddKernel, composedMultKernel]
 
     def argmaxModelEvidence(self, kernels):
+        bestKernel = None
+        maxModelEvidence = -np.inf
+        for kernel in kernels:
+            evidence = self.modelEvidence(kernel)
+            if evidence > maxModelEvidence:
+                bestKernel = kernel
+                maxModelEvidence = evidence
+        return bestKernel
+
+    def modelEvidence(self, kernel):
         pass
+
