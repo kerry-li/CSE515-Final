@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.gaussian_process import GaussianProcessRegressor as gpr
 
 # Class for automated model selection described by the method at
 # https://pdfs.semanticscholar.org/cc27/639170d87581e2e1ecdc4dca3716915619d2.pdf
@@ -46,6 +47,12 @@ class AutoKernelGpr:
                 maxModelEvidence = evidence
         return bestKernel
 
+    # I think the idea is to construct a gp, fit it to some (X,y),
+    # get gp.log_marginal_evidence(), then return BIC
     def modelEvidence(self, kernel):
-        pass
+        gp = gpr(kernel=kernel,n_restarts_optimizer=10)
+        gp.fit(D)
+        logModelEvidence = gp.log_marginal_likelihood()
+        bayesianInfoCriterion = np.log(n)*k - 2*logModelEvidence
+        return bayesianInfoCriterion
 
