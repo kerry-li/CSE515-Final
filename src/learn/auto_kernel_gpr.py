@@ -3,9 +3,9 @@ import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor as gpr
 
 # Class for automated model selection described by the method at
-# https://pdfs.semanticscholar.org/cc27/639170d87581e2e1ecdc4dca3716915619d2.pdf
-# using only GPR priors on the latent function.
+# https://arxiv.org/pdf/1302.4922.pdf.
 class AutoKernelGpr:
+
     def __init__(self, baseKernels, X, y):
         self.baseKernels = baseKernels
         self.X = X
@@ -21,44 +21,40 @@ class AutoKernelGpr:
 
     def search(self, currentKernel):
         augmentedKernels = []
-        for kernel in self.baseKernels:
-            augmentedKernels.extend(self.augment(currentKernel, kernel))
+        for baseKernel in self.baseKernels:
+            augmentedKernels.extend(self.augment(currentKernel, baseKernel))
 
         return self.argmaxBayesianInformationCriterion(augmentedKernels)
 
-    def augment(self, currentKernel, kernel):
+    def augment(self, currentKernel, baseKernel):
+        # Start with base kernels.
         if not currentKernel:
-            return [kernel]
+            return [baseKernel()]
 
-        def composedAddKernel(x, y, params):
-            return currentKernel(x, y,
-                                 params[:currentKernel.numParams]) + kernel(
-                x, y, params[currentKernel.numParams:kernel.numParams])
-
-        def composedMultKernel(x, y, params):
-            return currentKernel(x, y, params[
-                                       :currentKernel.numParams]) * kernel(
-                x, y, params[currentKernel.numParams:kernel.numParams])
-
-        totalParams = currentKernel.numParams + kernel.numParams
-        composedAddKernel.numParams = totalParams
-        composedMultKernel.numParams = totalParams
+        newKernel = baseKernel()
+        composedAddKernel = currentKernel + newKernel
+        composedMultKernel = currentKernel * newKernel
         return [composedAddKernel, composedMultKernel]
 
+    # Returns the kernel from /kernels/ with the highest Bayesian Information
+    # Criterion.
     def argmaxBayesianInformationCriterion(self, kernels):
         bestKernel = None
-        maxModelEvidence = -np.inf
+        maxBic = -np.inf
         for kernel in kernels:
-            evidence = self.bayesianInformationCriterion(kernel)
-            if evidence > maxModelEvidence:
+            bic = self.bayesianInformationCriterion(kernel)
+            if bic > maxBic:
                 bestKernel = kernel
-                maxModelEvidence = evidence
+                maxBic = bic
         return bestKernel
 
     # I think the idea is to construct a gp, fit it to some (X,y),
     # get gp.log_marginal_evidence(), then return BIC
     def bayesianInformationCriterion(self, kernel):
+        # Selects optimal hyperparameters with a random restarting search.
+        # The paper restarts only the newly introduced parameters.
+        # TODO: Only restart newly introduced parameters.
         gp = gpr(kernel=kernel, n_restarts_optimizer=10).fit(self.X, self.y)
         n, _ = self.X.shape
-        return gp.log_marginal_likelihood() - kernel.numParams / 2 * np.log(n)
+        return gp.log_marginal_likelihood() - kernel.n_dims / 2 * np.log(n)
 
