@@ -10,6 +10,7 @@ class AutoKernelGpr:
         self.baseKernels = baseKernels
         self.X = X
         self.y = y
+        self.bestKernelsAtEachLevel = []
 
     # Returns the trained GPR with the optimal kernel found after searching
     # for /rounds/ rounds.
@@ -18,6 +19,7 @@ class AutoKernelGpr:
         for round in range(rounds):
             print('Starting round {}'.format(round))
             kernel = self.search(kernel)
+            self.bestKernelsAtEachLevel.append(kernel)
         return kernel
 
     def search(self, currentKernel):
