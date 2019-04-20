@@ -1,6 +1,9 @@
+from sklearn.gaussian_process.kernels import RBF, ConstantKernel
+
 import data
 import learn.blr as blr
 import learn.gpr as gpr
+import learn.auto_kernel_gpr as auto_kernel_gpr
 
 import numpy as np
 import random
@@ -11,7 +14,7 @@ RED_WINE_FILENAME = '../data/winequality-red.csv'
 PERCENT_TRAINING = 0.8
 
 def trainAndValidate(fileName):
-    trainingData, valData = data.parseAndSplit(WHITE_WINE_FILENAME,
+    trainingData, valData = data.parseAndSplit(fileName,
                                                ';',
                                                PERCENT_TRAINING)
     trainingX, trainingY = trainingData
@@ -32,8 +35,11 @@ def main():
     random.seed(0)
     np.random.seed(0)
 
-    print(trainAndValidate(WHITE_WINE_FILENAME))
-    print(trainAndValidate(RED_WINE_FILENAME))
+    X, y = data.parseData(WHITE_WINE_FILENAME)
+    kernel = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel], X, y).searchForRounds(10)
+    # gp = gpr.trainGaussianProcess(X, y)
+    print(kernel)
+
 
 
 if __name__ == '__main__':
