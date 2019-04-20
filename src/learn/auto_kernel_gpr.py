@@ -16,6 +16,7 @@ class AutoKernelGpr:
     def searchForRounds(self, rounds):
         kernel = None
         for round in range(rounds):
+            print('Starting round {}'.format(round))
             kernel = self.search(kernel)
         return kernel
 
@@ -42,6 +43,7 @@ class AutoKernelGpr:
         bestKernel = None
         maxBic = -np.inf
         for kernel in kernels:
+            print('Evaluating kernel {}'.format(kernel))
             bic = self.bayesianInformationCriterion(kernel)
             if bic > maxBic:
                 bestKernel = kernel
@@ -54,7 +56,7 @@ class AutoKernelGpr:
         # Selects optimal hyperparameters with a random restarting search.
         # The paper restarts only the newly introduced parameters.
         # TODO: Only restart newly introduced parameters.
-        gp = gpr(kernel=kernel, n_restarts_optimizer=10).fit(self.X, self.y)
+        gp = gpr(kernel=kernel, n_restarts_optimizer=0).fit(self.X, self.y)
         n, _ = self.X.shape
         return gp.log_marginal_likelihood() - kernel.n_dims / 2 * np.log(n)
 
