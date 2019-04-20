@@ -1,11 +1,17 @@
 import numpy as np
+import scipy.integrate as integrate
+
+from scipy.stats import multivariate_normal
+
 
 # Class for automated model selection described by the method at
 # https://pdfs.semanticscholar.org/cc27/639170d87581e2e1ecdc4dca3716915619d2.pdf
 # using only GPR priors on the latent function.
 class AutoKernelGpr:
-    def __init__(self, baseKernels):
+    def __init__(self, baseKernels, X, y):
         self.baseKernels = baseKernels
+        self.X = X
+        self.y = y
 
     # Returns the trained GPR with the optimal kernel found after searching
     # for /rounds/ rounds.
@@ -25,12 +31,17 @@ class AutoKernelGpr:
     def augment(self, currentKernel, kernel):
         if not currentKernel:
             return [kernel]
-        composedAddKernel = lambda x, y, params: currentKernel(x, y, params[
-                                                                     :currentKernel.numParams]) + kernel(
-            x, y, params[currentKernel.numParams:kernel.numParams])
-        composedMultKernel = lambda x, y, params: currentKernel(x, y, params[
-                                                                      :currentKernel.numParams]) * kernel(
-            x, y, params[currentKernel.numParams:kernel.numParams])
+
+        def composedAddKernel(x, y, params):
+            return currentKernel(x, y,
+                                 params[:currentKernel.numParams]) + kernel(
+                x, y, params[currentKernel.numParams:kernel.numParams])
+
+        def composedMultKernel(x, y, params):
+            return currentKernel(x, y, params[
+                                       :currentKernel.numParams]) * kernel(
+                x, y, params[currentKernel.numParams:kernel.numParams])
+
         totalParams = currentKernel.numParams + kernel.numParams
         composedAddKernel.numParams = totalParams
         composedMultKernel.numParams = totalParams
@@ -47,5 +58,4 @@ class AutoKernelGpr:
         return bestKernel
 
     def modelEvidence(self, kernel):
-        pass
-
+        return
