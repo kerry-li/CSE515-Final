@@ -24,7 +24,7 @@ class AutoKernelGpr:
         for kernel in self.baseKernels:
             augmentedKernels.extend(self.augment(currentKernel, kernel))
 
-        return self.argmaxModelEvidence(augmentedKernels)
+        return self.argmaxBayesianInformationCriterion(augmentedKernels)
 
     def augment(self, currentKernel, kernel):
         if not currentKernel:
@@ -45,11 +45,11 @@ class AutoKernelGpr:
         composedMultKernel.numParams = totalParams
         return [composedAddKernel, composedMultKernel]
 
-    def argmaxModelEvidence(self, kernels):
+    def argmaxBayesianInformationCriterion(self, kernels):
         bestKernel = None
         maxModelEvidence = -np.inf
         for kernel in kernels:
-            evidence = self.modelEvidence(kernel)
+            evidence = self.bayesianInformationCriterion(kernel)
             if evidence > maxModelEvidence:
                 bestKernel = kernel
                 maxModelEvidence = evidence
@@ -57,11 +57,8 @@ class AutoKernelGpr:
 
     # I think the idea is to construct a gp, fit it to some (X,y),
     # get gp.log_marginal_evidence(), then return BIC
-    def modelEvidence(self, kernel):
-        gp = gpr(kernel=kernel, n_restarts_optimizer=10)
-        gp.fit(self.X, self.y)
-        logModelEvidence = gp.log_marginal_likelihood()
-        n, k = self.X.shape
-        bayesianInfoCriterion = np.log(n)*k - 2*logModelEvidence
-        return bayesianInfoCriterion
+    def bayesianInformationCriterion(self, kernel):
+        gp = gpr(kernel=kernel, n_restarts_optimizer=10).fit(self.X, self.y)
+        n, _ = self.X.shape
+        return gp.log_marginal_likelihood() - kernel.numParams / 2 * np.log(n)
 
