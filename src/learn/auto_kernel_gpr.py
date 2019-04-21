@@ -47,9 +47,9 @@ class AutoKernelGpr:
         maxBic = -np.inf
         for kernel in kernels:
             print('Evaluating kernel {}'.format(kernel))
-            bic, kernel_ = self.bayesianInformationCriterion(kernel)
+            bic, optimizedKernel = self.bayesianInformationCriterion(kernel)
             if bic > maxBic:
-                bestKernel = kernel_
+                bestKernel = optimizedKernel
                 maxBic = bic
         return bestKernel
 
