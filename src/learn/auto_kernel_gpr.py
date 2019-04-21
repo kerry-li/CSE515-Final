@@ -47,9 +47,9 @@ class AutoKernelGpr:
         maxBic = -np.inf
         for kernel in kernels:
             print('Evaluating kernel {}'.format(kernel))
-            bic = self.bayesianInformationCriterion(kernel)
+            bic, kernel_ = self.bayesianInformationCriterion(kernel)
             if bic > maxBic:
-                bestKernel = kernel
+                bestKernel = kernel_
                 maxBic = bic
         return bestKernel
 
@@ -61,5 +61,5 @@ class AutoKernelGpr:
         # TODO: Only restart newly introduced parameters.
         gp = gpr(kernel=kernel, n_restarts_optimizer=0).fit(self.X, self.y)
         n, _ = self.X.shape
-        return gp.log_marginal_likelihood() - kernel.n_dims / 2 * np.log(n)
+        return gp.log_marginal_likelihood() - kernel.n_dims / 2 * np.log(n), gp.kernel_
 
