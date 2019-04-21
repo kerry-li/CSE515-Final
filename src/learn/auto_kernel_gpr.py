@@ -19,6 +19,7 @@ class AutoKernelGpr:
         for round in range(rounds):
             print('Starting round {}'.format(round))
             kernel = self.search(kernel)
+            print('Best kernel of round {} is {}'.format(round, kernel))
             self.bestKernelsAtEachLevel.append(kernel)
         return kernel
 
