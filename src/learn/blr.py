@@ -3,7 +3,7 @@
 from sklearn.linear_model import BayesianRidge
 
 def fit(X, y):
-    return BayesianRidge().fit(X, y)
+    return BayesianRidge(compute_score = True).fit(X, y)
 
 def main():
     from src.data import parseData
