@@ -18,9 +18,9 @@ class AutoKernelGpr:
         kernel = None
         for round in range(rounds):
             print('Starting round {}'.format(round))
-            kernel = self.search(kernel)
+            kernel, bic = self.search(kernel)
             print('Best kernel of round {} is {}'.format(round, kernel))
-            self.bestKernelsAtEachLevel.append(kernel)
+            self.bestKernelsAtEachLevel.append((kernel, bic))
         return kernel
 
     def search(self, currentKernel):
@@ -51,7 +51,7 @@ class AutoKernelGpr:
             if bic > maxBic:
                 bestKernel = optimizedKernel
                 maxBic = bic
-        return bestKernel
+        return bestKernel, maxBic
 
     # I think the idea is to construct a gp, fit it to some (X,y),
     # get gp.log_marginal_evidence(), then return BIC

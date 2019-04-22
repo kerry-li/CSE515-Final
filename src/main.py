@@ -37,7 +37,7 @@ def main():
 
     X, y = data.parseData(RED_WINE_FILENAME)
     autoKernelGpr = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel], X, y)
-    kernel = autoKernelGpr.searchForRounds(3)
+    kernel = autoKernelGpr.searchForRounds(5)
     # gp = gpr.trainGaussianProcess(X, y)
     print(kernel)
     print(autoKernelGpr.bestKernelsAtEachLevel)
