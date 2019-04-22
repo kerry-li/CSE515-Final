@@ -48,6 +48,8 @@ def reportMSE(fileName, autoKernelGpr):
     linearMse = ((linearPredict - valY) ** 2).mean()
     gpMses = [((gprPredict - valY) ** 2).mean() for gprPredict in gprPredicts]
     
+    print "Linear model gives MSE: ",linearMse
+
     for i in range(len(autoKernelGpr.bestKernelsAtEachLevel)):
         print autoKernelGpr.bestKernelsAtEachLevel[i][0]," gives MSE: ",\
                 gpMses[i]
