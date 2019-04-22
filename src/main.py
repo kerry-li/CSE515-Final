@@ -21,7 +21,10 @@ def trainAndValidate(fileName):
     valX, valY = valData
 
     linearFit = blr.fit(trainingX, trainingY)
-    gprFit = gpr.trainGaussianProcess(trainingX, trainingY, ConstantKernel(1.0)*RBF(1.0))
+<<<<<<< HEAD
+=======
+    gprFit = gpr.trainGaussianProcess(trainingX, trainingY, ConstantKernel()*RBF())
+>>>>>>> 9d2ae03961ba6ce2f3942055c192cd2faad6b43e
 
     linearPredict = linearFit.predict(valX)
     gprPredict = gprFit.predict(valX)
@@ -48,11 +51,11 @@ def reportMSE(fileName, autoKernelGpr):
     linearMse = ((linearPredict - valY) ** 2).mean()
     gpMses = [((gprPredict - valY) ** 2).mean() for gprPredict in gprPredicts]
     
-    print "Linear model gives MSE: ",linearMse
+    print("Linear model gives MSE: ",linearMse)
 
     for i in range(len(autoKernelGpr.bestKernelsAtEachLevel)):
-        print autoKernelGpr.bestKernelsAtEachLevel[i][0]," gives MSE: ",\
-                gpMses[i]
+        print(autoKernelGpr.bestKernelsAtEachLevel[i][0]," gives MSE: ",\
+                gpMses[i])
 
     return linearMse, gpMses
 
@@ -61,9 +64,12 @@ def main():
     np.random.seed(0)
 
     X, y = data.parseData(RED_WINE_FILENAME)
+<<<<<<< HEAD
     autoKernelGpr = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel, WhiteKernel, RationalQuadratic, Matern], X, y)
     kernel = autoKernelGpr.searchForRounds(10)
     # gp = gpr.trainGaussianProcess(X, y)
+=======
+>>>>>>> 9d2ae03961ba6ce2f3942055c192cd2faad6b43e
     
     
     print(kernel)
