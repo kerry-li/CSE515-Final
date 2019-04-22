@@ -1,4 +1,4 @@
-from sklearn.gaussian_process.kernels import RBF, ConstantKernel
+from sklearn.gaussian_process.kernels import RBF, ConstantKernel, WhiteKernel, RationalQuadratic, Matern
 
 import data
 import learn.blr as blr
@@ -11,7 +11,7 @@ import random
 WHITE_WINE_FILENAME = '../data/winequality-white.csv'
 RED_WINE_FILENAME = '../data/winequality-red.csv'
 
-PERCENT_TRAINING = 0.8
+PERCENT_TRAINING = 1.0
 
 def trainAndValidate(fileName):
     trainingData, valData = data.parseAndSplit(fileName,
@@ -21,7 +21,7 @@ def trainAndValidate(fileName):
     valX, valY = valData
 
     linearFit = blr.fit(trainingX, trainingY)
-    gprFit = gpr.trainGaussianProcess(trainingX, trainingY, Constant(1.0)*RBF(1.0))
+    gprFit = gpr.trainGaussianProcess(trainingX, trainingY, ConstantKernel(1.0)*RBF(1.0))
 
     linearPredict = linearFit.predict(valX)
     gprPredict = gprFit.predict(valX)
@@ -61,8 +61,8 @@ def main():
     np.random.seed(0)
 
     X, y = data.parseData(RED_WINE_FILENAME)
-    autoKernelGpr = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel], X, y)
-    kernel = autoKernelGpr.searchForRounds(5)
+    autoKernelGpr = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel, WhiteKernel, RationalQuadratic, Matern], X, y)
+    kernel = autoKernelGpr.searchForRounds(10)
     # gp = gpr.trainGaussianProcess(X, y)
     
     
