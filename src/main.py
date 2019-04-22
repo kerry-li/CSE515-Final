@@ -64,14 +64,10 @@ def main():
     np.random.seed(0)
 
     X, y = data.parseData(RED_WINE_FILENAME)
-<<<<<<< HEAD
     autoKernelGpr = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel, WhiteKernel, RationalQuadratic, Matern], X, y)
     kernel = autoKernelGpr.searchForRounds(10)
     # gp = gpr.trainGaussianProcess(X, y)
-=======
->>>>>>> 9d2ae03961ba6ce2f3942055c192cd2faad6b43e
-    
-    
+
     print(kernel)
     print(autoKernelGpr.bestKernelsAtEachLevel)
 
