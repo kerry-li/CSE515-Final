@@ -21,15 +21,38 @@ def trainAndValidate(fileName):
     valX, valY = valData
 
     linearFit = blr.fit(trainingX, trainingY)
-    gprFit = gpr.trainGaussianProcess(trainingX, trainingY)
+    gprFit = gpr.trainGaussianProcess(trainingX, trainingY, Constant(1.0)*RBF(1.0))
 
     linearPredict = linearFit.predict(valX)
     gprPredict = gprFit.predict(valX)
 
-    whiteLinearMse = ((linearPredict - valY) ** 2).mean()
-    whiteGpMse = ((gprPredict - valY) ** 2).mean()
+    linearMse = ((linearPredict - valY) ** 2).mean()
+    gpMse = ((gprPredict - valY) ** 2).mean()
 
-    return whiteLinearMse, whiteGpMse
+    return linearMse, gpMse
+
+def reportMSE(fileName, autoKernelGpr):
+    trainingData, valData = data.parseAndSplit(fileName,
+                                               ';',
+                                               PERCENT_TRAINING)
+    trainingX, trainingY = trainingData
+    valX, valY = valData
+
+    linearFit = blr.fit(trainingX, trainingY)
+    gprFits = [gpr.trainGaussianProcess(trainingX, trainingY, kernel)\
+            for kernel, _ in autoKernelGpr.bestKernelsAtEachLevel]
+    
+    linearPredict = linearFit.predict(valX)
+    gprPredicts = [gprFit.predict(valX) for gprFit in gprFits]
+
+    linearMse = ((linearPredict - valY) ** 2).mean()
+    gpMses = [((gprPredict - valY) ** 2).mean() for gprPredict in gprPredicts]
+    
+    for i in range(len(autoKernelGpr.bestKernelsAtEachLevel)):
+        print autoKernelGpr.bestKernelsAtEachLevel[i][0]," gives MSE: ",\
+                gpMses[i]
+
+    return linearMse, gpMses
 
 def main():
     random.seed(0)
@@ -39,9 +62,12 @@ def main():
     autoKernelGpr = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel], X, y)
     kernel = autoKernelGpr.searchForRounds(5)
     # gp = gpr.trainGaussianProcess(X, y)
+    
+    
     print(kernel)
     print(autoKernelGpr.bestKernelsAtEachLevel)
 
+    reportMSE(RED_WINE_FILENAME,autoKernelGpr)
 
 
 if __name__ == '__main__':
