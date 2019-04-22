@@ -21,10 +21,7 @@ def trainAndValidate(fileName):
     valX, valY = valData
 
     linearFit = blr.fit(trainingX, trainingY)
-<<<<<<< HEAD
-=======
     gprFit = gpr.trainGaussianProcess(trainingX, trainingY, ConstantKernel()*RBF())
->>>>>>> 9d2ae03961ba6ce2f3942055c192cd2faad6b43e
 
     linearPredict = linearFit.predict(valX)
     gprPredict = gprFit.predict(valX)
