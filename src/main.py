@@ -1,80 +1,40 @@
-from sklearn.gaussian_process.kernels import RBF, ConstantKernel, WhiteKernel, RationalQuadratic, Matern
+import random
+import numpy as np
+
+from sklearn.gaussian_process.kernels import RBF, ConstantKernel, WhiteKernel, \
+    RationalQuadratic, Matern
+from sklearn.gaussian_process import GaussianProcessRegressor
 
 import data
 import learn.blr as blr
 import learn.gpr as gpr
 import learn.auto_kernel_gpr as auto_kernel_gpr
 
-import numpy as np
-import random
 
 WHITE_WINE_FILENAME = '../data/winequality-white.csv'
 RED_WINE_FILENAME = '../data/winequality-red.csv'
 
-PERCENT_TRAINING = 1.0
+PERCENT_TRAINING = 0.8
 
-def trainAndValidate(fileName):
-    trainingData, valData = data.parseAndSplit(fileName,
-                                               ';',
-                                               PERCENT_TRAINING)
-    trainingX, trainingY = data.parseData(RED_WINE_FILENAME)
-    valX, valY = valData
 
-    linearFit = blr.fit(trainingX, trainingY)
-    gprFit = gpr.trainGaussianProcess(trainingX, trainingY, ConstantKernel()*RBF())
-    
-    n, d = trainingX.shape
-    linearBIC = linearFit.scores_[-1] - (d + 2) / 2 * np.log(n)
-    gpBIC = gprFit.log_marginal_likelihood() - gprFit.kernel.n_dims / 2 * np.log(n)
+def mse(valX, valY, model):
+    predict = model.predict(valX)
+    return ((predict - valY) ** 2).mean()
 
-    linearPredict = linearFit.predict(valX)
-    gprPredict = gprFit.predict(valX)
-
-    linearMse = ((linearPredict - valY) ** 2).mean()
-    gpMse = ((gprPredict - valY) ** 2).mean()
-
-    return linearMse, gpMse, linearBIC, gpBIC
-
-def reportMSE(fileName, autoKernelGpr):
-    trainingData, valData = data.parseAndSplit(fileName,
-                                               ';',
-                                               PERCENT_TRAINING)
-    trainingX, trainingY = trainingData
-    valX, valY = valData
-
-    linearFit = blr.fit(trainingX, trainingY)
-    gprFits = [gpr.trainGaussianProcess(trainingX, trainingY, kernel)\
-            for kernel, _ in autoKernelGpr.bestKernelsAtEachLevel]
-    
-    linearPredict = linearFit.predict(valX)
-    gprPredicts = [gprFit.predict(valX) for gprFit in gprFits]
-
-    linearMse = ((linearPredict - valY) ** 2).mean()
-    gpMses = [((gprPredict - valY) ** 2).mean() for gprPredict in gprPredicts]
-    
-    print("Linear model gives MSE: ",linearMse)
-
-    for i in range(len(autoKernelGpr.bestKernelsAtEachLevel)):
-        print(autoKernelGpr.bestKernelsAtEachLevel[i][0]," gives MSE: ",\
-                gpMses[i])
-
-    return linearMse, gpMses
 
 def main():
     random.seed(0)
     np.random.seed(0)
 
-    trainAndValidate(RED_WINE_FILENAME)
+    trainingX, trainingY, valX, valY = data.parseAndSplit(RED_WINE_FILENAME)
 
-#    X, y = data.parseData(RED_WINE_FILENAME)
-#    autoKernelGpr = auto_kernel_gpr.AutoKernelGpr([RBF, ConstantKernel, WhiteKernel, RationalQuadratic, Matern], X, y)
-#    kernel = autoKernelGpr.searchForRounds(10)
-    # gp = gpr.trainGaussianProcess(X, y)
-
-#    print(kernel)
-#    print(autoKernelGpr.bestKernelsAtEachLevel)
-
-#    reportMSE(RED_WINE_FILENAME,autoKernelGpr)
+    autoKernelGpr = auto_kernel_gpr.AutoKernelGpr(
+        [RBF, ConstantKernel, WhiteKernel, RationalQuadratic, Matern], trainingX, trainingY)
+    kernel = autoKernelGpr.searchForRounds(5)
+    print('Best kernel: {}'.format(kernel))
+    for model, bic in autoKernelGpr.bestModelsAtEachLevel:
+        print(model.kernel_, bic)
+        print(mse(valX, valY, model))
 
 
 if __name__ == '__main__':

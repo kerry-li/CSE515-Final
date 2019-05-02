@@ -6,6 +6,7 @@ import pandas as pd
 
 from sklearn.preprocessing import normalize
 
+
 # Returns X, y parsed from file name.
 def parseData(fileName, delimiter=';', norm=True):
     allData = pd.read_csv(fileName, delimiter).values
@@ -15,6 +16,7 @@ def parseData(fileName, delimiter=';', norm=True):
     y = allData[:, -1:].ravel()
     return X, y
 
+
 def splitData(n, percentTraining=0.8):
     samples = np.arange(n)
     np.random.shuffle(samples)
@@ -23,18 +25,20 @@ def splitData(n, percentTraining=0.8):
     valSamples = samples[numberTraining:]
     return trainingSamples, valSamples
 
-def parseAndSplit(fileName, delimiter=';', percentTraining=0.8):
-    allX, allY = parseData(fileName, delimiter)
+
+def parseAndSplit(fileName, delimiter=';', percentTraining=0.8, norm=True):
+    allX, allY = parseData(fileName, delimiter, norm)
     trainingSamples, valSamples = splitData(allY.size, percentTraining)
-    training = (allX[trainingSamples], allY[trainingSamples])
-    val = (allX[valSamples], allY[valSamples])
-    return training, val
+    return allX[trainingSamples], allY[trainingSamples], allX[valSamples], allY[
+        valSamples]
+
 
 def main():
     X, y = parseData('../data/winequality-red.csv')
     print(splitData(100, .871))
     print(splitData(100, 1))
     print(X)
+
 
 if __name__ == '__main__':
     main()
